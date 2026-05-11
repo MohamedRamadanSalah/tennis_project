@@ -25,18 +25,16 @@
 
 Flutter is a **toolkit made by Google** for building mobile apps. One key advantage:
 
-```
-                   ┌───────────────┐
-                   │  One Codebase │
-                   │   (Dart code) │
-                   └───────┬───────┘
-                           │
-              ┌────────────┼────────────┐
-              ▼            ▼            ▼
-        ┌──────────┐ ┌──────────┐ ┌──────────┐
-        │ Android  │ │   iOS    │ │   Web    │
-        │   App    │ │   App    │ │   App    │
-        └──────────┘ └──────────┘ └──────────┘
+```mermaid
+graph TD
+    A["🖥️ One Codebase<br/>(Dart code)"] --> B["🤖 Android App"]
+    A --> C["🍎 iOS App"]
+    A --> D["🌐 Web App"]
+
+    style A fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style B fill:#c8e6c9,stroke:#2E7D32
+    style C fill:#f3e5f5,stroke:#7B1FA2
+    style D fill:#fff9c4,stroke:#F9A825
 ```
 
 **You write the code ONCE, and it runs on both Android and iPhone.** No need to write two separate apps.
@@ -79,35 +77,28 @@ class SwingData {
 
 Here's the complete flow from when you swing the phone to when you see numbers on screen:
 
-```
-Step 1: You swing the phone
-         │
-         ▼
-Step 2: The phone's hardware sensors detect motion
-         │
-         ├── Accelerometer → measures how fast the phone sped up
-         │                    (gives x, y, z values in m/s²)
-         │
-         └── Gyroscope → measures how fast the phone is rotating
-                          (gives x, y, z values in rad/s)
-         │
-         ▼
-Step 3: Our app reads these sensor values (20 times per second)
-         │
-         ▼
-Step 4: The app calculates:
-         │
-         ├── Acceleration = √(x² + y² + z²)
-         ├── Force = mass × acceleration    ← This is F = m × a
-         └── Rotation angle (accumulated)
-         │
-         ▼
-Step 5: The results appear on screen in real-time
-         │
-         ├── Live acceleration value (m/s²)
-         ├── Live force value (Newtons)
-         ├── Live rotation angle (degrees)
-         └── Peak values (the maximum recorded)
+```mermaid
+graph TD
+    A["🏸 You swing the phone"] --> B["📱 Phone sensors detect motion"]
+    B --> C["Accelerometer<br/>measures speed-up<br/>(x, y, z in m/s²)"]
+    B --> D["Gyroscope<br/>measures rotation<br/>(x, y, z in rad/s)"]
+    C --> E["🧮 App calculates"]
+    D --> E
+    E --> F["a = √(x² + y² + z²)<br/>Acceleration magnitude"]
+    E --> G["F = m × a<br/>Newton's Second Law"]
+    E --> H["θ += ω × Δt<br/>Rotation angle"]
+    F --> I["📊 Results on screen"]
+    G --> I
+    H --> I
+    I --> J["Live acceleration (m/s²)"]
+    I --> K["Live force (Newtons)"]
+    I --> L["Live rotation (degrees)"]
+    I --> M["Peak values (maximums)"]
+
+    style A fill:#fff9c4,stroke:#F9A825,stroke-width:2px
+    style B fill:#e3f2fd,stroke:#1565C0
+    style E fill:#e8f5e9,stroke:#2E7D32,stroke-width:2px
+    style I fill:#f3e5f5,stroke:#7B1FA2,stroke-width:2px
 ```
 
 ### In one sentence:
@@ -127,27 +118,36 @@ This is the core formula of the entire project.
 | **m** | Mass | Weight of the racket | 0.300 kg (adjustable by slider) |
 | **a** | Acceleration | How fast the phone sped up | Measured by the accelerometer |
 
-**Example calculation:**
-```
-If the accelerometer reads:  x = 3.0,  y = 4.0,  z = 0.0
+### Step-by-step calculation example:
 
-Step 1: a = √(3² + 4² + 0²) = √(9 + 16 + 0) = √25 = 5.0 m/s²
-Step 2: F = 0.300 kg × 5.0 m/s² = 1.50 N
+```mermaid
+graph LR
+    A["Accelerometer reads:<br/>x=3.0, y=4.0, z=0.0"] --> B["a = √(3² + 4² + 0²)<br/>a = √(9 + 16 + 0)<br/>a = √25 = 5.0 m/s²"]
+    B --> C["F = m × a<br/>F = 0.300 × 5.0<br/>F = 1.50 N"]
+    C --> D["📱 Screen shows:<br/>Force = 1.50 N"]
 
-The screen shows: Force = 1.50 N
+    style A fill:#fff9c4,stroke:#F9A825
+    style B fill:#e3f2fd,stroke:#1565C0
+    style C fill:#c8e6c9,stroke:#2E7D32
+    style D fill:#f3e5f5,stroke:#7B1FA2
 ```
 
 ### Rotation Angle
 
 The gyroscope tells us how fast the phone is spinning (in radians per second). We convert it to degrees:
 
-```
-angular_speed = √(gyroX² + gyroY² + gyroZ²)   ← how fast it's spinning
-angle_change = angular_speed × time × 57.296   ← convert to degrees
-total_angle = total_angle + angle_change        ← keep adding up
+```mermaid
+graph LR
+    A["Gyroscope reads:<br/>x, y, z (rad/s)"] --> B["ω = √(x² + y² + z²)<br/>Angular speed"]
+    B --> C["Δθ = ω × Δt × 57.296<br/>Convert to degrees"]
+    C --> D["total = total + Δθ<br/>Accumulate"]
+    D --> E["📱 Screen shows:<br/>Rotation = 45.2°"]
+
+    style A fill:#fff9c4,stroke:#F9A825
+    style E fill:#f3e5f5,stroke:#7B1FA2
 ```
 
-The number 57.296 = 180 ÷ π, which converts radians to degrees.
+The number **57.296 = 180 ÷ π**, which converts radians to degrees.
 
 ---
 
@@ -156,48 +156,42 @@ The number 57.296 = 180 ÷ π, which converts radians to degrees.
 Sensors are **tiny hardware chips** inside your phone that detect physical properties.
 
 ### Accelerometer
+
+Measures **how fast the phone speeds up** along 3 directions:
+
+```mermaid
+graph TD
+    subgraph Axes["📱 Accelerometer Axes"]
+        X["⬅️ ➡️ X-axis<br/>Left / Right"]
+        Y["⬆️ ⬇️ Y-axis<br/>Up / Down"]
+        Z["↙️ ↗️ Z-axis<br/>Forward / Backward"]
+    end
+    
+    Axes --> M["a = √(x² + y² + z²)<br/>Combined magnitude"]
+
+    style Axes fill:#fff9c4,stroke:#F9A825,stroke-width:2px
+    style M fill:#c8e6c9,stroke:#2E7D32
 ```
-Imagine a tiny ball on a spring inside the phone:
-
-    ┌───────────────────┐
-    │   ~~~●~~~         │  ← ball on spring
-    │   (resting)       │
-    └───────────────────┘
-
-    ┌───────────────────┐
-    │      ~~~●~~~~     │  ← ball shifts when you move
-    │   (you swung it!) │
-    └───────────────────┘
-
-The chip measures HOW FAR the ball shifted
-→ that tells us the acceleration
-```
-
-It measures along 3 directions:
-- **X** = left/right
-- **Y** = up/down
-- **Z** = forward/backward
 
 ### Gyroscope
-```
-Imagine a spinning wheel inside the phone:
 
-    ┌───────────────────┐
-    │      ↻            │  ← spinning disk
-    │  (stable axis)    │
-    └───────────────────┘
-
-When you rotate the phone, the spinning wheel
-resists the change → the chip measures this resistance
-→ that tells us the rotation speed
-```
+Measures **how fast the phone rotates** around each axis.
 
 ### Why We Use "User Accelerometer" (Not Regular)
 
-| Type | Includes Gravity? | What It Reads on a Table |
-|------|-------------------|-------------------------|
-| Regular Accelerometer | ✅ Yes | 9.8 m/s² (even when still!) |
-| **User Accelerometer** | ❌ No | 0.0 m/s² (only YOUR motion) |
+```mermaid
+graph LR
+    subgraph Regular["Regular Accelerometer"]
+        R1["Phone on table"] --> R2["Reads 9.8 m/s²<br/>❌ Includes gravity!"]
+    end
+    
+    subgraph User["User Accelerometer ✅"]
+        U1["Phone on table"] --> U2["Reads 0.0 m/s²<br/>✅ Only YOUR motion"]
+    end
+
+    style Regular fill:#ffcdd2,stroke:#D32F2F,stroke-width:2px
+    style User fill:#c8e6c9,stroke:#2E7D32,stroke-width:2px
+```
 
 We use the **User Accelerometer** because we only want to measure the swing, not gravity.
 
@@ -205,50 +199,60 @@ We use the **User Accelerometer** because we only want to measure the swing, not
 
 ## 6. The Folder Structure (Where Is Everything?)
 
-```
-lib/                                    ← ALL our code lives here
-│
-├── main.dart                           ← The starting point of the app
-│
-├── core/                               ← Stuff shared by the whole app
-│   ├── constants/
-│   │   └── app_constants.dart          ← Fixed numbers (mass, threshold, etc.)
-│   ├── theme/
-│   │   └── app_theme.dart              ← Colors and fonts
-│   └── router/
-│       └── app_router.dart             ← Which screen to show
-│
-├── features/                           ← The main features
-│   └── swing/                          ← Everything about the swing feature
-│       ├── models/
-│       │   └── swing_data.dart         ← The shape of our data
-│       ├── services/
-│       │   └── sensor_service.dart     ← Reads from phone sensors
-│       ├── logic/
-│       │   ├── swing_cubit.dart        ← The "brain" that manages everything
-│       │   └── swing_state.dart        ← The possible states (Ready/Recording/Stopped)
-│       └── presentation/
-│           └── screens/
-│               └── swing_screen.dart   ← What the user sees (the UI)
-│
-└── shared/                             ← Reusable UI components
-    └── widgets/
-        ├── metric_card.dart            ← Card showing a number with icon
-        ├── status_badge.dart           ← Pill showing "Ready"/"Recording"/"Stopped"
-        ├── racket_swing_indicator.dart  ← Animated tennis racket that reacts to movement
-        └── swing_result_card.dart      ← Summary card after you stop recording
+```mermaid
+graph TD
+    LIB["📁 lib/"] --> MAIN["📄 main.dart<br/>Starting point"]
+    LIB --> CORE["📁 core/<br/>Shared by whole app"]
+    LIB --> FEAT["📁 features/<br/>Main features"]
+    LIB --> SHARED["📁 shared/<br/>Reusable widgets"]
+
+    CORE --> CONST["📄 app_constants.dart<br/>Fixed numbers"]
+    CORE --> THEME["📄 app_theme.dart<br/>Colors & fonts"]
+    CORE --> ROUTER["📄 app_router.dart<br/>Navigation"]
+
+    FEAT --> SWING["📁 swing/"]
+    SWING --> MODELS["📄 swing_data.dart<br/>Data shape"]
+    SWING --> SERVICES["📄 sensor_service.dart<br/>Reads sensors"]
+    SWING --> LOGIC["📄 swing_cubit.dart<br/>+ swing_state.dart<br/>The brain"]
+    SWING --> PRES["📄 swing_screen.dart<br/>The UI"]
+
+    SHARED --> MC["📄 metric_card.dart"]
+    SHARED --> SB["📄 status_badge.dart"]
+    SHARED --> RSI["📄 racket_swing_indicator.dart"]
+    SHARED --> SRC["📄 swing_result_card.dart"]
+
+    style LIB fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style CORE fill:#fff9c4,stroke:#F9A825
+    style FEAT fill:#c8e6c9,stroke:#2E7D32
+    style SHARED fill:#f3e5f5,stroke:#7B1FA2
+    style SWING fill:#c8e6c9,stroke:#2E7D32
 ```
 
 ### Why is it organized this way?
 
 Think of it like a **restaurant**:
-- `core/` = The building (walls, lights, decoration) — shared by all
-- `features/swing/` = The kitchen for one specific dish
-  - `models/` = The recipe card (what ingredients do we need?)
-  - `services/` = The delivery guy (gets ingredients from the market = sensors)
-  - `logic/` = The chef (decides what to cook and when)
-  - `presentation/` = The waiter (presents the dish to the customer = user)
-- `shared/widgets/` = Plates and utensils — used by any dish
+
+```mermaid
+graph LR
+    subgraph Building["🏢 core/ = The Building"]
+        A1["Walls, lights<br/>decoration"]
+    end
+    
+    subgraph Kitchen["🍳 features/swing/ = The Kitchen"]
+        B1["📋 models/<br/>Recipe card"]
+        B2["🚚 services/<br/>Delivery guy<br/>(gets ingredients = sensors)"]
+        B3["👨‍🍳 logic/<br/>The Chef<br/>(decides what to cook)"]
+        B4["🍽️ presentation/<br/>The Waiter<br/>(serves to customer)"]
+    end
+    
+    subgraph Tools["🍴 shared/ = Plates & Utensils"]
+        C1["Used by<br/>any dish"]
+    end
+
+    style Building fill:#fff9c4,stroke:#F9A825,stroke-width:2px
+    style Kitchen fill:#c8e6c9,stroke:#2E7D32,stroke-width:2px
+    style Tools fill:#f3e5f5,stroke:#7B1FA2,stroke-width:2px
+```
 
 ---
 
@@ -285,25 +289,32 @@ Think of it like a **restaurant**:
 
 Think of it as a **form** that gets filled out 20 times per second:
 
-```
-┌──────────────────────────────────────────────┐
-│ SwingData Form                               │
-│                                              │
-│ Live values:                                 │
-│   acceleration: _____ m/s²                   │
-│   force: _____ N                             │
-│   rotationAngle: _____ °                     │
-│                                              │
-│ Peak values (highest seen so far):           │
-│   maxAcceleration: _____ m/s²                │
-│   maxForce: _____ N                          │
-│                                              │
-│ Swing detected? ☐ Yes  ☐ No                 │
-│                                              │
-│ Raw sensor readings:                         │
-│   accel X: ___ Y: ___ Z: ___                │
-│   gyro  X: ___ Y: ___ Z: ___                │
-└──────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph SwingData["📋 SwingData Form"]
+        direction TB
+        L["🔴 Live Values"]
+        L1["acceleration: ___ m/s²"]
+        L2["force: ___ N"]
+        L3["rotationAngle: ___ °"]
+        
+        P["🏆 Peak Values"]
+        P1["maxAcceleration: ___ m/s²"]
+        P2["maxForce: ___ N"]
+        
+        S["⚡ Swing Detection"]
+        S1["swingDetected: Yes/No"]
+        
+        R["📡 Raw Sensor Readings"]
+        R1["accel X ___ Y ___ Z ___"]
+        R2["gyro X ___ Y ___ Z ___"]
+    end
+
+    style SwingData fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style L fill:#ffcdd2,stroke:#D32F2F
+    style P fill:#fff9c4,stroke:#F9A825
+    style S fill:#c8e6c9,stroke:#2E7D32
+    style R fill:#f3e5f5,stroke:#7B1FA2
 ```
 
 ---
@@ -312,19 +323,40 @@ Think of it as a **form** that gets filled out 20 times per second:
 
 **What it does:** Connects to the phone's hardware sensors and does the math.
 
-```
-Phone Hardware              SensorService              Rest of App
-  ┌──────────┐            ┌──────────────┐          ┌──────────────┐
-  │ Accel    │──x,y,z──→ │ a = √(x²+y²+z²) │─────→│              │
-  │ Sensor   │            │ F = m × a     │          │   SwingData  │
-  └──────────┘            │               │          │   (the form) │
-  ┌──────────┐            │ θ += ω×dt     │          │              │
-  │ Gyro     │──x,y,z──→ │               │─────→   │              │
-  │ Sensor   │            └──────────────┘          └──────────────┘
-  └──────────┘
-```
+```mermaid
+graph LR
+    subgraph HW["📱 Phone Hardware"]
+        ACC["Accelerometer<br/>x, y, z"]
+        GYRO["Gyroscope<br/>x, y, z"]
+    end
 
-It also tracks **peak values** — the highest acceleration and force seen during the recording. This is what the assignment asks for: "the force generated by swinging."
+    subgraph SS["⚙️ SensorService"]
+        CALC1["a = √(x²+y²+z²)"]
+        CALC2["F = m × a"]
+        CALC3["θ += ω × Δt"]
+        PEAK["Track peaks<br/>(max a, max F)"]
+        DETECT["Swing detected?<br/>(a > 5.0 m/s²)"]
+    end
+
+    subgraph OUT["📦 Output"]
+        SD["SwingData<br/>(the filled form)"]
+    end
+
+    ACC --> CALC1
+    GYRO --> CALC3
+    CALC1 --> CALC2
+    CALC1 --> PEAK
+    CALC2 --> PEAK
+    CALC1 --> DETECT
+    PEAK --> SD
+    DETECT --> SD
+    CALC2 --> SD
+    CALC3 --> SD
+
+    style HW fill:#fff9c4,stroke:#F9A825,stroke-width:2px
+    style SS fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style OUT fill:#c8e6c9,stroke:#2E7D32,stroke-width:2px
+```
 
 ---
 
@@ -332,35 +364,62 @@ It also tracks **peak values** — the highest acceleration and force seen durin
 
 **What it does:** Controls the flow. Receives data from the sensor service, decides what state the app should be in, and tells the screen to update.
 
-```
-User presses "Start" → Cubit tells SensorService to start
-                      → Cubit starts emitting "Recording" states
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as SwingScreen
+    participant Cubit as SwingCubit
+    participant Svc as SensorService
+    participant HW as Phone Sensors
 
-Sensor data arrives   → Cubit wraps it in a state
-                      → If swing detected → phone vibrates!
-                      → Screen updates automatically
+    User->>UI: Taps "Start Recording"
+    UI->>Cubit: startRecording()
+    Cubit->>Svc: startListening()
+    Svc->>HW: Subscribe to sensors
 
-User presses "Stop"   → Cubit tells SensorService to stop
-                      → Cubit emits "Stopped" state with final data
+    loop Every 50ms
+        HW-->>Svc: raw x, y, z data
+        Svc-->>Svc: Calculate a, F, θ
+        Svc-->>Cubit: SwingData
+        Cubit-->>UI: SwingRecording(data)
+        UI-->>User: Screen updates
+    end
+
+    User->>UI: Taps "Stop Recording"
+    UI->>Cubit: stopRecording()
+    Cubit->>Svc: stopListening()
+    Cubit-->>UI: SwingStopped(data)
+    UI-->>User: Shows result card
 ```
 
 ---
 
 ### `swing_state.dart` — The Three Possible States
 
-The app can only be in ONE of these three states at any time:
+The app can only be in **ONE** of these three states at any time:
 
-```
-┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│  SwingInitial   │      │ SwingRecording   │      │  SwingStopped   │
-│                 │      │                  │      │                 │
-│ • Badge: Ready  │ ───→ │ • Badge: Record  │ ───→ │ • Badge: Stopped│
-│ • Cards: 0.00   │start │ • Cards: live    │stop  │ • Cards: frozen │
-│ • Btn: Start    │      │ • Btn: Stop      │      │ • Btn: New Swing│
-│ • Racket: grey  │      │ • Racket: glowing│      │ • Results card  │
-└─────────────────┘      └─────────────────┘      └────────┬────────┘
-        ▲                                                   │
-        └────────────────── reset ──────────────────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> SwingInitial
+
+    SwingInitial --> SwingRecording : startRecording()
+    SwingRecording --> SwingStopped : stopRecording()
+    SwingStopped --> SwingInitial : reset()
+
+    SwingInitial : 🔵 Badge = Ready
+    SwingInitial : Cards show 0.00
+    SwingInitial : Button = Start Recording
+    SwingInitial : Racket icon = grey
+
+    SwingRecording : 🔴 Badge = Recording
+    SwingRecording : Cards show live data
+    SwingRecording : Button = Stop Recording
+    SwingRecording : Racket icon = glowing
+
+    SwingStopped : 🟠 Badge = Stopped
+    SwingStopped : Shows result card
+    SwingStopped : Button = New Swing
+    SwingStopped : Peak values displayed
 ```
 
 ---
@@ -370,31 +429,43 @@ The app can only be in ONE of these three states at any time:
 **What it does:** Draws everything on the screen. It watches the Cubit and redraws itself whenever the state changes.
 
 **Screen layout:**
-```
-┌───────────────────────────────────┐
-│ ▌ Tennis Swing Analyzer      (i) │  ← Green AppBar
-├───────────────────────────────────┤
-│         ⬤ Ready                  │  ← Status Badge
-│                                   │
-│         🎾  (racket icon)         │  ← Animated racket
-│                                   │
-│  ┌─ Acceleration ──────────────┐  │
-│  │  ⚡  12.34 m/s²             │  │  ← Metric Card
-│  └─────────────────────────────┘  │
-│  ┌─ Force (F = m × a) ────────┐  │
-│  │  💪  3.70 N                 │  │  ← Metric Card
-│  └─────────────────────────────┘  │
-│  ┌─ Rotation Angle ───────────┐  │
-│  │  🔄  45.2°                  │  │  ← Metric Card
-│  └─────────────────────────────┘  │
-│  ┌─ Racket Mass ──────────────┐  │
-│  │  🎾  ○────●────○  300g     │  │  ← Mass Slider
-│  └─────────────────────────────┘  │
-│                                   │
-│  ┌─────────────────────────────┐  │
-│  │      ▶ Start Recording      │  │  ← Action Button
-│  └─────────────────────────────┘  │
-└───────────────────────────────────┘
+
+```mermaid
+block-beta
+    columns 1
+    block:appbar["🟢 Tennis Swing Analyzer  ℹ️"]
+        columns 1
+    end
+    space
+    block:badge["⚪ Status Badge (Ready / Recording / Stopped)"]
+        columns 1
+    end
+    space
+    block:racket["🎾 Animated Racket Indicator"]
+        columns 1
+    end
+    space
+    block:cards["📊 Metric Cards"]
+        columns 1
+        A["⚡ Acceleration: 12.34 m/s²"]
+        B["💪 Force (F=m×a): 3.70 N"]
+        C["🔄 Rotation: 45.2°"]
+    end
+    space
+    block:slider["🎾 Racket Mass Slider (100g — 500g)"]
+        columns 1
+    end
+    space
+    block:button["▶️ Start Recording / ⏹️ Stop / 🔄 New Swing"]
+        columns 1
+    end
+
+    style appbar fill:#2E7D32,color:#fff
+    style badge fill:#e3f2fd,stroke:#1565C0
+    style racket fill:#fff9c4,stroke:#F9A825
+    style cards fill:#f5f5f5,stroke:#9E9E9E
+    style slider fill:#f5f5f5,stroke:#9E9E9E
+    style button fill:#2E7D32,color:#fff
 ```
 
 ---
@@ -409,30 +480,34 @@ When the user swings the phone, the numbers on screen need to change **20 times 
 
 Think of a Cubit as a **TV remote control**:
 
-```
-Remote (Cubit)               TV Screen (UI)
-┌──────────────┐            ┌───────────────────┐
-│              │            │                   │
-│ [Start]  ●───┼──────────→ │  Shows live data   │
-│              │  "state"   │  Red badge         │
-│ [Stop]   ●───┼──────────→ │  Shows results     │
-│              │  "state"   │  Orange badge      │
-│ [Reset]  ●───┼──────────→ │  Shows zeros       │
-│              │  "state"   │  Blue badge        │
-└──────────────┘            └───────────────────┘
+```mermaid
+graph LR
+    subgraph Remote["🎮 Remote (Cubit)"]
+        START["▶️ Start"]
+        STOP["⏹️ Stop"]
+        RESET["🔄 Reset"]
+    end
 
-You press a button (method) → the TV changes (state)
+    subgraph TV["📺 TV Screen (UI)"]
+        CH1["Channel 1:<br/>Shows live data<br/>🔴 Red badge"]
+        CH2["Channel 2:<br/>Shows results<br/>🟠 Orange badge"]
+        CH3["Channel 3:<br/>Shows zeros<br/>🔵 Blue badge"]
+    end
+
+    START -->|"emits state"| CH1
+    STOP -->|"emits state"| CH2
+    RESET -->|"emits state"| CH3
+
+    style Remote fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style TV fill:#fff9c4,stroke:#F9A825,stroke-width:2px
 ```
+
+**You press a button (call a method) → the TV changes (state emits) → the screen updates.**
 
 **Three buttons (methods):**
 - `startRecording()` — starts sensors, emits SwingRecording state
 - `stopRecording()` — stops sensors, emits SwingStopped state
 - `reset()` — clears everything, emits SwingInitial state
-
-**Three channels (states):**
-- `SwingInitial` — app is idle, waiting for user
-- `SwingRecording` — sensors are active, data is flowing
-- `SwingStopped` — recording done, showing results
 
 ---
 
@@ -440,21 +515,24 @@ You press a button (method) → the TV changes (state)
 
 The UI uses a `BlocBuilder` widget — it **watches** the Cubit and **rebuilds** the screen whenever the state changes:
 
-```
-Cubit emits new state
-         │
-         ▼
-BlocBuilder detects the change
-         │
-         ▼
-Checks: What type of state is it?
-         │
-         ├── SwingInitial?    → Show "Ready" badge, zeros, Start button
-         ├── SwingRecording?  → Show "Recording" badge, live data, Stop button
-         └── SwingStopped?    → Show "Stopped" badge, result card, New Swing button
-         │
-         ▼
-Screen redraws with the correct information
+```mermaid
+flowchart TD
+    A["Cubit emits new state"] --> B{"What type of state?"}
+    
+    B -->|"SwingInitial"| C["🔵 Ready badge<br/>All zeros<br/>Start button"]
+    B -->|"SwingRecording"| D["🔴 Recording badge<br/>Live data<br/>Stop button"]
+    B -->|"SwingStopped"| E["🟠 Stopped badge<br/>Result card<br/>New Swing button"]
+    
+    C --> F["Screen redraws automatically"]
+    D --> F
+    E --> F
+
+    style A fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style B fill:#fff9c4,stroke:#F9A825,stroke-width:2px
+    style C fill:#bbdefb,stroke:#1565C0
+    style D fill:#ffcdd2,stroke:#D32F2F
+    style E fill:#ffe0b2,stroke:#E65100
+    style F fill:#c8e6c9,stroke:#2E7D32,stroke-width:2px
 ```
 
 This happens **automatically** — we don't manually tell the screen to update. The Cubit emits a state, and the BlocBuilder handles the rest.

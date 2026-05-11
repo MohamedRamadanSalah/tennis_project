@@ -12,6 +12,36 @@
 | **State Management** | flutter_bloc (Cubit pattern) |
 | **Sensor Library** | sensors_plus 7.0.0 |
 
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Hardware["📱 Phone Hardware"]
+        ACC["Accelerometer<br/>MEMS 3-axis"]
+        GYRO["Gyroscope<br/>MEMS 3-axis"]
+    end
+
+    subgraph App["📦 Flutter Application"]
+        SS["SensorService<br/>Reads raw data"]
+        CUBIT["SwingCubit<br/>State management"]
+        UI["SwingScreen<br/>User interface"]
+    end
+
+    ACC -->|"x, y, z (m/s²)"| SS
+    GYRO -->|"x, y, z (rad/s)"| SS
+    SS -->|"Stream of SwingData"| CUBIT
+    CUBIT -->|"SwingState"| UI
+    UI -->|"start / stop / reset"| CUBIT
+
+    style Hardware fill:#e8f5e9,stroke:#2E7D32,stroke-width:2px
+    style App fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style ACC fill:#fff9c4,stroke:#F9A825
+    style GYRO fill:#fff9c4,stroke:#F9A825
+    style SS fill:#c8e6c9,stroke:#2E7D32
+    style CUBIT fill:#bbdefb,stroke:#1565C0
+    style UI fill:#f3e5f5,stroke:#7B1FA2
+```
+
 ---
 
 ## 2. Test Device Specifications
@@ -42,8 +72,6 @@
 | **Range** | Typically ±2g to ±16g depending on device configuration |
 | **Why Gravity-Free** | We only need acceleration caused by the user's swing, not the constant 9.8 m/s² from gravity |
 
-**How we use it:** We read the X, Y, Z acceleration values and compute the total magnitude using `a = √(x² + y² + z²)`, then apply Newton's Second Law: **F = m × a**.
-
 ### 3.2 Gyroscope
 
 | Property | Detail |
@@ -53,7 +81,23 @@
 | **Unit** | rad/s (radians per second) |
 | **Range** | Typically ±2000 °/s |
 
-**How we use it:** We accumulate rotational velocity over time to calculate the total rotation angle: `Δθ = ω × Δt × (180/π)`, where ω is angular speed, Δt is the time interval, and the conversion factor translates radians to degrees.
+### Sensor Processing Pipeline
+
+```mermaid
+graph LR
+    A["Accelerometer<br/>x, y, z"] --> B["Magnitude<br/>a = √(x² + y² + z²)"]
+    B --> C["Newton's Law<br/>F = m × a"]
+    C --> D["📊 Display<br/>Force in Newtons"]
+
+    E["Gyroscope<br/>x, y, z"] --> F["Angular Speed<br/>ω = √(x² + y² + z²)"]
+    F --> G["Integration<br/>Δθ = ω × Δt × 57.3"]
+    G --> H["📊 Display<br/>Angle in Degrees"]
+
+    style A fill:#fff9c4,stroke:#F9A825
+    style E fill:#fff9c4,stroke:#F9A825
+    style D fill:#c8e6c9,stroke:#2E7D32
+    style H fill:#c8e6c9,stroke:#2E7D32
+```
 
 ---
 
@@ -86,6 +130,17 @@
 | **CPU usage** | Minimal — lightweight math (sqrt, multiply) 20 times/sec. No GPU or ML workloads |
 | **Battery impact** | Negligible for short sessions (1–5 min). For continuous use, the gyroscope is the largest consumer |
 | **Optimization** | Sensors are only active during recording; stopped when idle to conserve battery |
+
+### Power Breakdown
+
+```mermaid
+pie title Power Consumption During Recording
+    "Screen Backlight" : 200
+    "CPU Processing" : 10
+    "Gyroscope" : 5
+    "Accelerometer" : 0.5
+    "Other" : 30
+```
 
 ### 5.3 Efficiency
 
@@ -136,7 +191,32 @@
 
 ---
 
-## 7. Formulas Used
+## 7. Application State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> SwingInitial : App launches
+
+    SwingInitial --> SwingRecording : User taps Start
+    SwingRecording --> SwingStopped : User taps Stop
+    SwingStopped --> SwingInitial : User taps New Swing
+
+    SwingInitial : 🔵 Ready
+    SwingInitial : Cards show 0.00
+    SwingInitial : Button = Start Recording
+
+    SwingRecording : 🔴 Recording
+    SwingRecording : Cards show live data
+    SwingRecording : Button = Stop Recording
+
+    SwingStopped : 🟠 Stopped
+    SwingStopped : Shows peak results
+    SwingStopped : Button = New Swing
+```
+
+---
+
+## 8. Formulas Used
 
 ```
 Acceleration:    a = √(x² + y² + z²)          — 3D magnitude from accelerometer
@@ -147,6 +227,6 @@ Rotation:        Δθ = ω × Δt × (180/π)         — Angular displacement f
 
 ---
 
-## 8. Conclusion
+## 9. Conclusion
 
 The Tennis Swing Analyzer successfully demonstrates the application of Newton's Second Law using smartphone sensors. While the measurements are estimates rather than laboratory-grade data, the app provides clear, real-time visualization of physics concepts. The choice of Flutter enables cross-platform deployment, and the fully offline architecture ensures the app works reliably in any environment. The main limitation is that the phone measures hand acceleration rather than actual racket head force, but this is inherent to all phone-based motion applications and is clearly documented.
