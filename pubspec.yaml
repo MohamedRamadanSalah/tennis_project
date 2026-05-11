@@ -1,0 +1,33 @@
+name: tennis_swing_analyzer
+description: "An offline mobile app that uses phone sensors to analyze tennis swing mechanics."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ── State Management ──
+  # flutter_bloc provides the Cubit pattern for managing app state.
+  # Cubit is a lightweight version of Bloc — perfect for educational projects.
+  flutter_bloc: ^9.1.1
+
+  # ── Sensor Access ──
+  # sensors_plus gives us access to the phone's accelerometer & gyroscope.
+  # These are the hardware sensors we use to detect the tennis swing.
+  sensors_plus: ^7.0.0
+
+  # ── Utilities ──
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
