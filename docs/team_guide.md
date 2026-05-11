@@ -431,41 +431,25 @@ stateDiagram-v2
 **Screen layout:**
 
 ```mermaid
-block-beta
-    columns 1
-    block:appbar["🟢 Tennis Swing Analyzer  ℹ️"]
-        columns 1
-    end
-    space
-    block:badge["⚪ Status Badge (Ready / Recording / Stopped)"]
-        columns 1
-    end
-    space
-    block:racket["🎾 Animated Racket Indicator"]
-        columns 1
-    end
-    space
-    block:cards["📊 Metric Cards"]
-        columns 1
-        A["⚡ Acceleration: 12.34 m/s²"]
-        B["💪 Force (F=m×a): 3.70 N"]
-        C["🔄 Rotation: 45.2°"]
-    end
-    space
-    block:slider["🎾 Racket Mass Slider (100g — 500g)"]
-        columns 1
-    end
-    space
-    block:button["▶️ Start Recording / ⏹️ Stop / 🔄 New Swing"]
-        columns 1
-    end
+graph TD
+    APP["🟢 Tennis Swing Analyzer — AppBar"] --> BADGE["⚪ Status Badge<br/>Ready / Recording / Stopped"]
+    BADGE --> RACKET["🎾 Animated Racket Indicator<br/>Scales + Rotates + Glows"]
+    RACKET --> CARD1["⚡ Acceleration: 12.34 m/s²"]
+    CARD1 --> CARD2["💪 Force F=m×a : 3.70 N"]
+    CARD2 --> CARD3["🔄 Rotation: 45.2°"]
+    CARD3 --> PEAKS["🏆 Peak Values<br/>Max Accel + Max Force"]
+    PEAKS --> SLIDER["🎾 Racket Mass Slider<br/>100g ○────●────○ 500g"]
+    SLIDER --> BTN["▶️ Start Recording / ⏹️ Stop / 🔄 New Swing"]
 
-    style appbar fill:#2E7D32,color:#fff
-    style badge fill:#e3f2fd,stroke:#1565C0
-    style racket fill:#fff9c4,stroke:#F9A825
-    style cards fill:#f5f5f5,stroke:#9E9E9E
-    style slider fill:#f5f5f5,stroke:#9E9E9E
-    style button fill:#2E7D32,color:#fff
+    style APP fill:#2E7D32,color:#fff,stroke:#1B5E20
+    style BADGE fill:#e3f2fd,stroke:#1565C0
+    style RACKET fill:#fff9c4,stroke:#F9A825
+    style CARD1 fill:#e8f5e9,stroke:#2E7D32
+    style CARD2 fill:#fff8e1,stroke:#F9A825
+    style CARD3 fill:#e8f5e9,stroke:#66BB6A
+    style PEAKS fill:#fce4ec,stroke:#D32F2F
+    style SLIDER fill:#f5f5f5,stroke:#9E9E9E
+    style BTN fill:#2E7D32,color:#fff,stroke:#1B5E20
 ```
 
 ---
