@@ -17,9 +17,8 @@ dependencies:
   flutter_bloc: ^9.1.1
 
   # ── Sensor Access ──
-  # sensors_plus gives us access to the phone's accelerometer & gyroscope.
-  # These are the hardware sensors we use to detect the tennis swing.
-  sensors_plus: ^7.0.0
+  # Sensor data is now streamed from native Android (Kotlin) via EventChannel.
+  # No third-party sensor package is required.
 
   # ── Utilities ──
   cupertino_icons: ^1.0.8

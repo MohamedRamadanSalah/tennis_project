@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:sensors_plus/sensors_plus.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/swing_data.dart';
 
@@ -10,7 +10,8 @@ import '../models/swing_data.dart';
 /// The bridge between the phone's hardware sensors and our app.
 ///
 /// HOW IT WORKS:
-///   1. Subscribes to accelerometer and gyroscope streams.
+///   1. Subscribes to native Android EventChannel streams for
+///      accelerometer (gravity-removed) and gyroscope data.
 ///   2. On every reading it calculates:
 ///        - acceleration magnitude (from accelerometer x,y,z)
 ///        - estimated force (F = m × a)
@@ -21,11 +22,31 @@ import '../models/swing_data.dart';
 ///
 /// WHY a service layer?
 /// - Separates "how we get data" from "how we manage state".
-/// - If we swap sensors_plus for another package, only this
-///   file changes — the rest of the app stays untouched.
+/// - Sensor data comes from native Android (Kotlin) via EventChannel
+///   platform channels — SensorManager APIs read the hardware directly.
+/// - If the native implementation changes, only this file is updated.
+///
+/// NATIVE CHANNELS:
+///   • com.example.flutter_project/accelerometer
+///       TYPE_LINEAR_ACCELERATION — gravity removed, in m/s².
+///   • com.example.flutter_project/gyroscope
+///       TYPE_GYROSCOPE — angular velocity, in rad/s.
 /// ============================================================
 
 class SensorService {
+  // ── EventChannel definitions ──
+
+  /// Channel for gravity-removed linear acceleration (matches the previous
+  /// sensors_plus userAccelerometerEventStream behaviour).
+  static const _accelChannel = EventChannel(
+    'com.example.flutter_project/accelerometer',
+  );
+
+  /// Channel for gyroscope angular velocity.
+  static const _gyroChannel = EventChannel(
+    'com.example.flutter_project/gyroscope',
+  );
+
   // ── Internal state ──
 
   /// The mass used for F = m × a. Can be updated by the user.
@@ -65,19 +86,19 @@ class SensorService {
   /// Returns the current racket mass.
   double get racketMass => _racketMassKg;
 
-  /// Starts reading from the phone sensors.
+  /// Starts reading from the phone sensors via native Android EventChannels.
+  ///
+  /// The sampling period is configured on the native side (50 ms / 20 Hz),
+  /// matching AppConstants.sensorIntervalMs.
   void startListening() {
-    final interval = Duration(milliseconds: AppConstants.sensorIntervalMs);
-
     // ── Accelerometer ──
-    // userAccelerometer removes gravity, giving us only the
-    // acceleration caused by the user's hand movement.
-    _accelSubscription = userAccelerometerEventStream(
-      samplingPeriod: interval,
-    ).listen((event) {
-      _accelX = event.x;
-      _accelY = event.y;
-      _accelZ = event.z;
+    // Gravity-removed linear acceleration (TYPE_LINEAR_ACCELERATION).
+    // The native side sends [x, y, z] as a List<double>.
+    _accelSubscription = _accelChannel.receiveBroadcastStream().listen((event) {
+      final data = event as List;
+      _accelX = (data[0] as num).toDouble();
+      _accelY = (data[1] as num).toDouble();
+      _accelZ = (data[2] as num).toDouble();
 
       // Every time we get a new accelerometer reading,
       // combine it with the latest gyroscope data and emit.
@@ -85,16 +106,17 @@ class SensorService {
     });
 
     // ── Gyroscope ──
-    _gyroSubscription = gyroscopeEventStream(
-      samplingPeriod: interval,
-    ).listen((event) {
-      _gyroX = event.x;
-      _gyroY = event.y;
-      _gyroZ = event.z;
+    // Angular velocity in rad/s (TYPE_GYROSCOPE).
+    // The native side sends [x, y, z] as a List<double>.
+    _gyroSubscription = _gyroChannel.receiveBroadcastStream().listen((event) {
+      final data = event as List;
+      _gyroX = (data[0] as num).toDouble();
+      _gyroY = (data[1] as num).toDouble();
+      _gyroZ = (data[2] as num).toDouble();
 
       // Accumulate rotation: gyro gives rad/s, multiply by interval
       // in seconds, then convert radians → degrees.
-      final double dtSeconds = AppConstants.sensorIntervalMs / 1000.0;
+      const double dtSeconds = AppConstants.sensorIntervalMs / 1000.0;
       final double angularSpeed = sqrt(
         _gyroX * _gyroX + _gyroY * _gyroY + _gyroZ * _gyroZ,
       );
@@ -103,9 +125,15 @@ class SensorService {
   }
 
   /// Stops reading from sensors and cleans up resources.
+  ///
+  /// Cancelling the stream subscriptions triggers [onCancel] on the native
+  /// SensorStreamHandler, which immediately unregisters the hardware sensor
+  /// listener — preventing battery drain or stale registrations.
   void stopListening() {
     _accelSubscription?.cancel();
+    _accelSubscription = null;
     _gyroSubscription?.cancel();
+    _gyroSubscription = null;
   }
 
   /// Resets ALL accumulated values (for starting a new swing).
