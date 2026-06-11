@@ -10,23 +10,6 @@ import '../../logic/swing_cubit.dart';
 import '../../logic/swing_state.dart';
 import '../../models/swing_data.dart';
 
-/// ============================================================
-/// SwingScreen
-/// ============================================================
-/// The main screen of the app. Provides the full "Wii-like"
-/// tennis swing experience:
-///
-///   1. Animated racket visual that reacts to movement
-///   2. Live metric cards (acceleration, force, rotation)
-///   3. Mass slider to adjust racket weight
-///   4. Swing detection indicator
-///   5. Result summary card when stopped
-///
-/// STATE-DRIVEN UI:
-/// - SwingInitial  → Ready state, racket idle, "Start" button
-/// - SwingRecording → Live data, racket animating, "Stop" button
-/// - SwingStopped   → Result card with peak values, "New Swing"
-/// ============================================================
 
 class SwingScreen extends StatelessWidget {
   const SwingScreen({super.key});
@@ -34,7 +17,7 @@ class SwingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ── App Bar ──
+
       appBar: AppBar(
         title: const Text(AppConstants.appName),
         actions: [
@@ -46,10 +29,10 @@ class SwingScreen extends StatelessWidget {
         ],
       ),
 
-      // ── Body ──
+
       body: BlocBuilder<SwingCubit, SwingState>(
         builder: (context, state) {
-          // Extract the data to display (or use empty defaults)
+
           final SwingData data = switch (state) {
             SwingInitial() => SwingData.empty(),
             SwingRecording(:final data) => data,
@@ -61,17 +44,17 @@ class SwingScreen extends StatelessWidget {
               padding: const EdgeInsets.all(AppConstants.defaultPadding),
               child: Column(
                 children: [
-                  // ── Status Badge ──
+
                   _buildStatusBadge(state),
 
                   const SizedBox(height: 16),
 
-                  // ── Scrollable Content ──
+
                   Expanded(
                     child: ListView(
                       children: [
-                        // ── Racket Animation ──
-                        // The centerpiece "Wii-like" visual
+
+
                         Center(
                           child: RacketSwingIndicator(
                             acceleration: data.acceleration,
@@ -82,8 +65,7 @@ class SwingScreen extends StatelessWidget {
 
                         const SizedBox(height: 8),
 
-                        // ── Swing Detection Indicator ──
-                        // Shows "Swing!" text when above threshold
+
                         Center(
                           child: AnimatedOpacity(
                             opacity: data.swingDetected ? 1.0 : 0.0,
@@ -101,7 +83,7 @@ class SwingScreen extends StatelessWidget {
 
                         const SizedBox(height: 16),
 
-                        // ── Show result card ONLY in stopped state ──
+
                         if (state is SwingStopped) ...[
                           SwingResultCard(
                             maxAcceleration: data.maxAcceleration,
@@ -112,8 +94,7 @@ class SwingScreen extends StatelessWidget {
                           const SizedBox(height: 16),
                         ],
 
-                        // ── Live Metric Cards ──
-                        // Show live + peak values during recording
+
                         MetricCard(
                           icon: Icons.speed,
                           color: AppTheme.primaryColor,
@@ -141,7 +122,7 @@ class SwingScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
 
-                        // ── Peak Values Row (visible during/after recording) ──
+
                         if (state is SwingRecording || state is SwingStopped)
                           Card(
                             shape: RoundedRectangleBorder(
@@ -198,7 +179,7 @@ class SwingScreen extends StatelessWidget {
 
                         const SizedBox(height: 10),
 
-                        // ── Mass Slider ──
+
                         _buildMassSlider(context),
                       ],
                     ),
@@ -206,7 +187,7 @@ class SwingScreen extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  // ── Action Buttons ──
+
                   _buildActionButtons(context, state),
                 ],
               ),
@@ -217,7 +198,7 @@ class SwingScreen extends StatelessWidget {
     );
   }
 
-  // ── Status Badge ──
+
   Widget _buildStatusBadge(SwingState state) {
     return switch (state) {
       SwingInitial() => const StatusBadge(
@@ -238,8 +219,7 @@ class SwingScreen extends StatelessWidget {
     };
   }
 
-  // ── Mass Slider ──
-  // Lets the user adjust the racket mass used in F = m × a.
+
   Widget _buildMassSlider(BuildContext context) {
     final cubit = context.read<SwingCubit>();
 
@@ -276,7 +256,7 @@ class SwingScreen extends StatelessWidget {
               value: cubit.currentMass,
               min: AppConstants.minRacketMassKg,
               max: AppConstants.maxRacketMassKg,
-              divisions: 40, // steps of 10 grams
+              divisions: 40,
               activeColor: AppTheme.primaryColor,
               label: '${(cubit.currentMass * 1000).round()} g',
               onChanged: (value) {
@@ -298,7 +278,7 @@ class SwingScreen extends StatelessWidget {
     );
   }
 
-  // ── Action Buttons ──
+
   Widget _buildActionButtons(BuildContext context, SwingState state) {
     final cubit = context.read<SwingCubit>();
 
@@ -336,7 +316,7 @@ class SwingScreen extends StatelessWidget {
     };
   }
 
-  // ── About Dialog ──
+
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,

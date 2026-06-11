@@ -2,29 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 
-/// ============================================================
-/// SwingResultCard — Reusable Widget
-/// ============================================================
-/// Displays a summary of the swing results after recording stops.
-///
-/// Shows the PEAK values (not just the last reading), which is
-/// what the assignment asks for: "calculate the force generated
-/// by swinging."
-///
-/// Used only in the SwingStopped state.
-/// ============================================================
 
 class SwingResultCard extends StatelessWidget {
-  /// The peak acceleration during the recording (m/s²).
+
   final double maxAcceleration;
 
-  /// The peak force during the recording (N).
+
   final double maxForce;
 
-  /// The total rotation angle during the recording (°).
+
   final double totalRotation;
 
-  /// The racket mass used for the calculation (kg).
+
   final double racketMass;
 
   const SwingResultCard({
@@ -48,7 +37,7 @@ class SwingResultCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ──
+
             Row(
               children: [
                 Container(
@@ -75,7 +64,7 @@ class SwingResultCard extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 12),
 
-            // ── Result Rows ──
+
             _buildResultRow(
               context,
               icon: Icons.speed,
@@ -115,7 +104,7 @@ class SwingResultCard extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 8),
 
-            // ── Formula reminder ──
+
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -145,7 +134,7 @@ class SwingResultCard extends StatelessWidget {
     );
   }
 
-  /// Builds a single row in the result card.
+
   Widget _buildResultRow(
     BuildContext context, {
     required IconData icon,
