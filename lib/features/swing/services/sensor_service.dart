@@ -68,7 +68,7 @@ class SensorService {
       final double angularSpeed = sqrt(
         _gyroX * _gyroX + _gyroY * _gyroY + _gyroZ * _gyroZ,
       );
-      _totalRotation += angularSpeed * dtSeconds * (180 / pi);
+      _totalRotation = (_totalRotation + angularSpeed * dtSeconds * (180 / pi)) % 360;
     });
   }
 
